@@ -15,6 +15,7 @@ kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 
 # Propriedades de icones
+app_icon_path = "graphics/app_icon.png"
 mouse_icon_path = "graphics/mouse_icon.png"
 keyboard_icon_path = "graphics/keyboard_icon.png"
 scale_factor = 3  # Favor não mudar (é sério)
@@ -38,6 +39,9 @@ def load_image_and_scale(image_path):
 
 mouse_icon = load_image_and_scale(mouse_icon_path)
 keyboard_icon = load_image_and_scale(keyboard_icon_path)
+app_icon = load_image_and_scale(app_icon_path)
+
+pygame.display.set_icon(app_icon)  # tem que ser antes do while True loop senão ele carrega depois que o jogo começa
 
 
 def movement():
