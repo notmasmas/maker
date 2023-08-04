@@ -3,9 +3,6 @@ from sys import exit
 
 from pygame import surface
 
-# import random
-# from entity import *
-
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -19,13 +16,15 @@ kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 440))
 
 ground_height = 40
-ground_color = (34,139,34)
+ground_color = (34, 139, 34)
 ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, ground_height)
 
+mouse_controls = True
 
 def movement():
-    kiwi_rect.x = pygame.mouse.get_pos()[0]
-    keys = pygame.key.get_pressed()
+    if mouse_controls:
+        kiwi_rect.x = pygame.mouse.get_pos()[0]
+
     if keys[pygame.K_a]:
         kiwi_rect.x -= 5
     if keys[pygame.K_d]:
@@ -37,10 +36,14 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+    keys = pygame.key.get_pressed()
 
     screen.fill("white")
     pygame.draw.rect(screen, ground_color, ground)
     screen.blit(kiwi_surf, (kiwi_rect.x, kiwi_rect.y))
+
+
+
     movement()
 
     pygame.display.update()
