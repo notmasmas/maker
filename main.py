@@ -1,8 +1,6 @@
 import pygame
 from sys import exit
 
-from pygame import surface
-
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -20,6 +18,7 @@ ground_color = (34, 139, 34)
 ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, ground_height)
 
 mouse_controls = True
+
 
 def movement():
     if mouse_controls:
@@ -41,8 +40,6 @@ while True:
     screen.fill("white")
     pygame.draw.rect(screen, ground_color, ground)
     screen.blit(kiwi_surf, (kiwi_rect.x, kiwi_rect.y))
-
-
 
     movement()
 
