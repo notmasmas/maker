@@ -21,8 +21,7 @@ mouse_controls = True
 
 
 def movement():
-    if mouse_controls:
-        kiwi_rect.x = pygame.mouse.get_pos()[0]
+    kiwi_rect.x = pygame.mouse.get_pos()[0]
 
     if keys[pygame.K_a]:
         kiwi_rect.x -= 5
