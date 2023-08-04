@@ -3,6 +3,8 @@ from sys import exit
 
 from pygame import surface
 
+# teste
+
 # import random
 # from entity import *
 
