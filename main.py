@@ -19,7 +19,7 @@ kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 440))
 
 ground_height = 40
-ground_color = (34,139,34)
+ground_color = (34, 139, 34)
 ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, ground_height)
 
 
