@@ -14,6 +14,11 @@ screen_height = screen.get_height() / 2
 kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 
+# Propriedades do kiwi (fruta)
+fruit_surf = pygame.image.load("graphics/fruit.png")
+fruit_rect = fruit_surf.get_rect(midtop=(screen_width, 0))
+fruit_grav = 0
+
 # Propriedades de icones
 app_icon_path = "graphics/app_icon.png"
 mouse_icon_path = "graphics/mouse_icon.png"
@@ -69,7 +74,10 @@ while True:
 
     screen.fill("white")
     pygame.draw.rect(screen, ground_color, ground)
-    screen.blit(kiwi_surf, (kiwi_rect.x, kiwi_rect.y))
+    screen.blit(kiwi_surf, kiwi_rect)
+
+    fruit_grav += 1  # soma um a posição y da fruta a cada frame
+    screen.blit(fruit_surf, (fruit_rect.x, fruit_rect.y + fruit_grav))
 
     movement()
 
