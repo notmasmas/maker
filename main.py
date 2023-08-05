@@ -1,5 +1,9 @@
+import random
+
 import pygame
 from sys import exit
+
+from fruit import Fruit
 
 pygame.init()
 
@@ -14,10 +18,9 @@ screen_height = screen.get_height() / 2
 kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 
-# Propriedades do kiwi (fruta)
+# Propriedades da fruta
 fruit_surf = pygame.image.load("graphics/fruit.png")
-fruit_rect = fruit_surf.get_rect(midtop=(screen_width, 0))
-fruit_grav = 0
+fruits = []
 
 # Propriedades de icones
 app_icon_path = "graphics/app_icon.png"
@@ -46,20 +49,31 @@ mouse_icon = load_image_and_scale(mouse_icon_path)
 keyboard_icon = load_image_and_scale(keyboard_icon_path)
 app_icon = load_image_and_scale(app_icon_path)
 
-pygame.display.set_icon(app_icon)  # tem que ser antes do while True loop senão ele carrega depois que o jogo começa
+
+def render_ui():    # Função para caso vc precise renderizar alguma coisa relacionada a UI na tela :)
+    if mouse_controls:
+        screen.blit(mouse_icon, icon_pos)
+    else:
+        screen.blit(keyboard_icon, icon_pos)
 
 
 def movement():
     if mouse_controls:
         kiwi_rect.x = pygame.mouse.get_pos()[0]
-        screen.blit(mouse_icon, icon_pos)
 
     if not mouse_controls:
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             kiwi_rect.x -= 5
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             kiwi_rect.x += 5
-        screen.blit(keyboard_icon, icon_pos)
+
+
+def spawn_new_fruit():
+    x_pos = random.randint(0, (screen_width * 2) - 36)
+    fruit_speed = random.randint(1, 4)
+    new_fruit = Fruit(x_pos, fruit_speed, fruit_surf)
+    fruits.append(new_fruit)
+    print(fruits)
 
 
 while True:
@@ -71,15 +85,27 @@ while True:
         elif keys[pygame.K_e]:
             mouse_controls = not mouse_controls
             print(mouse_controls)
+        elif keys[pygame.K_g]:
+            spawn_new_fruit()
 
-    screen.fill("white")
-    pygame.draw.rect(screen, ground_color, ground)
-    screen.blit(kiwi_surf, kiwi_rect)
+    screen.fill("white")  # isolaaaaaaaaaaaaaaaaaadoooooos...... isolaaaaaaaaaaaaaaaaaaaadooooooooooos uuuuuuuuuuuuuuu
 
-    fruit_grav += 1  # soma um a posição y da fruta a cada frame
-    screen.blit(fruit_surf, (fruit_rect.x, fruit_rect.y + fruit_grav))
+    for fruit in fruits:
+        fruit.update()
+        if fruit.rect.colliderect(ground):
+            fruits.remove(fruit)  # desenha as frutas
 
     movement()
+
+    # se vc for fazer algo envolvendo adicionar mais coisas pra renderizar e tals, coloca de baixo dessa linha
+    # pra ficar mais facil de ler o codigo, a logica e essas coisas deixa na parte de cima
+
+    screen.blit(kiwi_surf, kiwi_rect)  # desenha o player
+    pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
+    for fruit in fruits:
+        screen.blit(fruit.image, fruit.rect)
+
+    render_ui()
 
     pygame.display.update()
     clock.tick(60)
