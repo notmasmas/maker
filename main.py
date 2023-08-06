@@ -7,6 +7,7 @@ from sys import exit
 from fruit import Fruit
 from bomb import Bomb
 from cloud import Cloud
+from heart import Heart
 
 pygame.init()
 
@@ -14,7 +15,6 @@ screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Kiwi :D")
 clock = pygame.time.Clock()
 font = pygame.font.Font("graphics/fonts/Minecrafter.Reg.ttf", 30)
-
 
 screen_width = screen.get_width() / 2
 screen_height = screen.get_height() / 2
@@ -26,9 +26,11 @@ kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 # Propriedades dos objetos
 fruit_image_path = "graphics/fruit_kiwi.png"
 bomb_image_path = "graphics/bomb.png"
+heart_image_path = "graphics/lifes1.png"
 fruit_types = ["kiwi", "banana", "orange"]
 fruits = []
 bombs = []
+hearts = []
 
 # Propriedades nuvem
 cloud_surf = pygame.image.load("graphics/cloud.png")
@@ -53,6 +55,7 @@ current_time = initial_time
 countdown = 0
 spawn_cloud_event = pygame.USEREVENT + 1
 pygame.time.set_timer(spawn_cloud_event, 5000)
+first_fruit = False
 
 score = 0
 score_font = font.render(str(score), False, "black")
@@ -76,11 +79,12 @@ mouse_icon = load_image_and_scale(mouse_icon_path, 3)
 keyboard_icon = load_image_and_scale(keyboard_icon_path, 3)
 app_icon = load_image_and_scale(app_icon_path, 3)
 bomb_surf = load_image_and_scale(bomb_image_path, 3)
+heart_surf = load_image_and_scale(heart_image_path, 3)
 
 pygame.display.set_icon(app_icon)
 
 
-def render_ui():    # Função para caso vc precise renderizar alguma coisa relacionada a UI na tela :)
+def render_ui():  # Função para caso vc precise renderizar alguma coisa relacionada a UI na tela :)
     if mouse_controls:
         screen.blit(mouse_icon, icon_pos)
     else:
@@ -89,6 +93,13 @@ def render_ui():    # Função para caso vc precise renderizar alguma coisa rela
     global score_font
     score_font = font.render(str(score), False, "black")
     screen.blit(score_font, score_rect)
+
+    if lifes == 3:
+        screen.blit(lifes3_surf, lifes_rect)
+    elif lifes == 2:
+        screen.blit(lifes2_surf, lifes_rect)
+    elif lifes == 1:
+        screen.blit(lifes1_surf, lifes_rect)
 
 
 def movement():
@@ -117,6 +128,13 @@ def spawn_new_bomb():
     bombs.append(new_bomb)
 
 
+def spawn_new_heart():
+    heart_x_pos = random.randint(0, (int(screen_width * 2) - 36))
+    heart_speed = random.randint(3, 7)
+    new_heart = Bomb(heart_x_pos, heart_speed, heart_surf)
+    hearts.append(new_heart)
+
+
 def spawn_new_cloud():
     cloud_y_pos = random.randint(20, 100)
     cloud_speed = random.randint(1, 2)
@@ -130,6 +148,9 @@ def randomize_spawns():
         spawn_new_bomb()
     else:
         spawn_new_fruit()
+
+    if random.randint(1, 100) <= 12:
+        spawn_new_heart()
 
 
 while True:
@@ -152,14 +173,23 @@ while True:
             randomize_spawns()
         countdown = current_time + random.randint(1, 2)
 
+    if score < 0:
+        score = 0
+
+    if score <= -1 and first_fruit:
+        print("You lose!")
+
     for fruit in fruits:
         fruit.update()
         if fruit.rect.colliderect(ground):
             fruits.remove(fruit)
+            score -= 5
         if fruit.rect.colliderect(kiwi_rect):
             if fruit in fruits:
                 fruits.remove(fruit)
-                score += 1
+                if first_fruit:
+                    score += 1
+                first_fruit = True
 
     for bomb in bombs:
         bomb.update()
@@ -171,6 +201,15 @@ while True:
             if lifes == -1:
                 pygame.quit()
                 exit()
+
+    for heart in hearts:
+        heart.update()
+        if heart.rect.colliderect(ground):
+            hearts.remove(heart)
+        if heart.rect.colliderect(kiwi_rect):
+            if lifes < 3:
+                lifes += 1
+            hearts.remove(heart)
 
     for cloud in clouds:
         cloud.update()
@@ -187,21 +226,17 @@ while True:
     screen.blit(kiwi_surf, kiwi_rect)  # desenha o player
     pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
 
-    for cloud in clouds:    # desenha as nuvens
+    for cloud in clouds:  # desenha as nuvens
         screen.blit(cloud.image, cloud.rect)
 
-    for fruit in fruits:    # desenha as frutas
+    for fruit in fruits:  # desenha as frutas
         screen.blit(fruit.image, fruit.rect)
 
     for bomb in bombs:  # desenha as bombas
         screen.blit(bomb.image, bomb.rect)
 
-    if lifes == 3:
-        screen.blit(lifes3_surf, lifes_rect)
-    elif lifes == 2:
-        screen.blit(lifes2_surf, lifes_rect)
-    elif lifes == 1:
-        screen.blit(lifes1_surf, lifes_rect)
+    for heart in hearts:
+        screen.blit(heart.image, heart.rect)
 
     render_ui()
 
