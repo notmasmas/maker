@@ -13,7 +13,8 @@ pygame.init()
 screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Kiwi :D")
 clock = pygame.time.Clock()
-font = pygame.font.Font("graphics/Minecrafter.Reg.ttf", 30)
+font = pygame.font.Font("graphics/fonts/Minecrafter.Reg.ttf", 30)
+
 
 screen_width = screen.get_width() / 2
 screen_height = screen.get_height() / 2
@@ -23,15 +24,15 @@ kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 
 # Propriedades dos objetos
-fruit_surf = pygame.image.load("graphics/fruit.png")
+fruit_image_path = "graphics/fruit_kiwi.png"
 bomb_image_path = "graphics/bomb.png"
-objects = []
+fruit_types = ["kiwi", "banana", "orange"]
+fruits = []
+bombs = []
 
 # Propriedades nuvem
 cloud_surf = pygame.image.load("graphics/cloud.png")
 clouds = []
-spawn_interval = 5000
-last_spawn = 0
 
 # Propriedades de icones
 app_icon_path = "graphics/app_icon.png"
@@ -45,10 +46,13 @@ ground_color = (34, 139, 34)
 ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, ground_height)
 
 # Variáveis aleatórias ai sla
+background_color = (135, 206, 335)
 mouse_controls = True
 initial_time = time.time()
 current_time = initial_time
 countdown = 0
+spawn_cloud_event = pygame.USEREVENT + 1
+pygame.time.set_timer(spawn_cloud_event, 5000)
 
 score = 0
 score_font = font.render(str(score), False, "black")
@@ -67,14 +71,18 @@ keyboard_icon = load_image_and_scale(keyboard_icon_path, 3)
 app_icon = load_image_and_scale(app_icon_path, 3)
 bomb_surf = load_image_and_scale(bomb_image_path, 3)
 
+pygame.display.set_icon(app_icon)
+
 
 def render_ui():    # Função para caso vc precise renderizar alguma coisa relacionada a UI na tela :)
     if mouse_controls:
         screen.blit(mouse_icon, icon_pos)
     else:
         screen.blit(keyboard_icon, icon_pos)
+
     global score_font
     score_font = font.render(str(score), False, "black")
+    screen.blit(score_font, score_rect)
 
 
 def movement():
@@ -89,17 +97,25 @@ def movement():
 
 
 def spawn_new_fruit():
-    fruit_x_pos = random.randint(0, (screen_width * 2) - 36)
+    fruit_x_pos = random.randint(0, (int(screen_width * 2) - 36))
     fruit_speed = random.randint(1, 4)
-    new_fruit = Fruit(fruit_x_pos, fruit_speed, fruit_surf)
-    objects.append(new_fruit)
+    fruit_type = random.randint(1, len(fruit_types))
+    new_fruit = Fruit(fruit_x_pos, fruit_speed, fruit_type)
+    fruits.append(new_fruit)
 
 
 def spawn_new_bomb():
-    bomb_x_pos = random.randint(0, (screen_width * 2) - 36)
+    bomb_x_pos = random.randint(0, (int(screen_width * 2) - 36))
     bomb_speed = random.randint(1, 4)
     new_bomb = Bomb(bomb_x_pos, bomb_speed, bomb_surf)
-    objects.append(new_bomb)
+    bombs.append(new_bomb)
+
+
+def spawn_new_cloud():
+    cloud_y_pos = random.randint(20, 100)
+    cloud_speed = random.randint(1, 2)
+    new_cloud = Cloud(cloud_y_pos, cloud_speed, cloud_surf)
+    clouds.append(new_cloud)
 
 
 def randomize_spawns():
@@ -110,27 +126,18 @@ def randomize_spawns():
         spawn_new_fruit()
 
 
-def spawn_new_cloud():
-    y_pos = random.randint(20, 60)
-    cloud_speed = random.randint(1, 2)
-    new_cloud = Cloud(y_pos, cloud_speed, cloud_surf)
-    clouds.append(new_cloud)
-
-
-pygame.display.set_icon(app_icon)
-
-
 while True:
-    keys = pygame.key.get_pressed()  # n pergunta pq essa variavel ta aq
+    keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
         elif keys[pygame.K_e]:
             mouse_controls = not mouse_controls
-            print(mouse_controls)
+        elif event.type == spawn_cloud_event:
+            spawn_new_cloud()
 
-    screen.fill("lightblue")  # isolaaaaaaaaaaaaaaaaaadoooooos...... isolaaaaaaaaaaaaaaaaaaaadooooooooooos uuuuuuuuuuuuuuu
+    screen.fill("lightblue")
 
     current_time = time.time()
 
@@ -139,27 +146,27 @@ while True:
             randomize_spawns()
         countdown = current_time + random.randint(1, 2)
 
-    if current_time - last_spawn >= spawn_interval:
-        spawn_new_cloud()
-        last_spawn = current_time
-
-    # TODO: juntar as frutas e bombas em uma classe
-    for fruit in objects:
+    for fruit in fruits:
         fruit.update()
         if fruit.rect.colliderect(ground):
-            objects.remove(fruit)  # desenha as frutas
+            fruits.remove(fruit)
         if fruit.rect.colliderect(kiwi_rect):
-            if fruit in objects:
-                objects.remove(fruit)
+            if fruit in fruits:
+                fruits.remove(fruit)
                 score += 1
 
-    for bomb in objects:
+    for bomb in bombs:
         bomb.update()
         if bomb.rect.colliderect(ground):
-            objects.remove(bomb)
+            bombs.remove(bomb)
+        if bomb.rect.colliderect(kiwi_rect):
+            bombs.remove(bomb)
+            score -= 1
 
     for cloud in clouds:
         cloud.update()
+        if cloud.rect.x < -200:
+            clouds.remove(cloud)
 
     movement()
 
@@ -170,15 +177,15 @@ while True:
 
     screen.blit(kiwi_surf, kiwi_rect)  # desenha o player
     pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
-    for fruit in objects:
-        screen.blit(fruit.image, fruit.rect)
-    for bomb in objects:
-        screen.blit(bomb.image, bomb.rect)
 
-    for cloud in clouds:
+    for cloud in clouds:    # desenha as nuvens
         screen.blit(cloud.image, cloud.rect)
 
-    screen.blit(score_font, score_rect)
+    for fruit in fruits:    # desenha as frutas
+        screen.blit(fruit.image, fruit.rect)
+
+    for bomb in bombs:  # desenha as bombas
+        screen.blit(bomb.image, bomb.rect)
 
     render_ui()
 
