@@ -38,6 +38,7 @@ clouds = []
 app_icon_path = "graphics/app_icon.png"
 mouse_icon_path = "graphics/mouse_icon.png"
 keyboard_icon_path = "graphics/keyboard_icon.png"
+boom_path = "graphics/boom.png"
 icon_pos = (screen_width + 265, screen_height + 195)
 
 # Propriedades do chão
@@ -76,6 +77,7 @@ mouse_icon = load_image_and_scale(mouse_icon_path, 3)
 keyboard_icon = load_image_and_scale(keyboard_icon_path, 3)
 app_icon = load_image_and_scale(app_icon_path, 3)
 bomb_surf = load_image_and_scale(bomb_image_path, 3)
+boom_surf = load_image_and_scale(boom_path, 3)
 
 pygame.display.set_icon(app_icon)
 
@@ -166,6 +168,8 @@ while True:
         if bomb.rect.colliderect(ground):
             bombs.remove(bomb)
         if bomb.rect.colliderect(kiwi_rect):
+            boom_rect = boom_surf.get_rect(topleft=(bomb.rect.x, bomb.rect.y))
+            screen.blit(boom_surf, boom_rect)
             bombs.remove(bomb)
             lifes -= 1
             if lifes == -1:
