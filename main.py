@@ -8,6 +8,7 @@ from fruit import Fruit
 from bomb import Bomb
 from cloud import Cloud
 
+pygame.mixer.init()
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -29,6 +30,10 @@ bomb_image_path = "graphics/bomb.png"
 fruit_types = ["kiwi", "banana", "orange"]
 fruits = []
 bombs = []
+
+# Propriedades sound effect
+pygame.mixer.music.load("graphics/vine-boom.mp3")
+pygame.mixer.music.set_volume(0.3)
 
 # Propriedades nuvem
 cloud_surf = pygame.image.load("graphics/cloud.png")
@@ -92,6 +97,13 @@ def render_ui():    # Função para caso vc precise renderizar alguma coisa rela
     score_font = font.render(str(score), False, "black")
     screen.blit(score_font, score_rect)
 
+    if lifes == 3:
+        screen.blit(lifes3_surf, lifes_rect)
+    elif lifes == 2:
+        screen.blit(lifes2_surf, lifes_rect)
+    elif lifes == 1:
+        screen.blit(lifes1_surf, lifes_rect)
+
 
 def movement():
     if mouse_controls:
@@ -127,8 +139,8 @@ def spawn_new_cloud():
 
 
 def randomize_spawns():
-    random_spawn_type = random.randint(0, 4)
-    if random_spawn_type == 0:
+    random_spawn_type = random.randint(0, 6)
+    if random_spawn_type in range(0, 2):
         spawn_new_bomb()
     else:
         spawn_new_fruit()
@@ -139,6 +151,7 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
+            pygame.mixer.quit()
             exit()
         elif keys[pygame.K_e]:
             mouse_controls = not mouse_controls
@@ -170,6 +183,7 @@ while True:
         if bomb.rect.colliderect(kiwi_rect):
             boom_rect = boom_surf.get_rect(topleft=(bomb.rect.x, bomb.rect.y))
             screen.blit(boom_surf, boom_rect)
+            pygame.mixer.music.play()
             bombs.remove(bomb)
             lifes -= 1
             if lifes == -1:
@@ -199,13 +213,6 @@ while True:
 
     for bomb in bombs:  # desenha as bombas
         screen.blit(bomb.image, bomb.rect)
-
-    if lifes == 3:
-        screen.blit(lifes3_surf, lifes_rect)
-    elif lifes == 2:
-        screen.blit(lifes2_surf, lifes_rect)
-    elif lifes == 1:
-        screen.blit(lifes1_surf, lifes_rect)
 
     render_ui()
 
