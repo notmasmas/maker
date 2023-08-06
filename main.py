@@ -133,6 +133,8 @@ while True:
     # se vc for fazer algo envolvendo adicionar mais coisas pra renderizar e tals, coloca de baixo dessa linha
     # pra ficar mais facil de ler o codigo, a logica e essas coisas deixa na parte de cima
 
+    # okay bjos <3
+
     screen.blit(kiwi_surf, kiwi_rect)  # desenha o player
     pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
     for fruit in fruits:
