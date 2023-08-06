@@ -1,9 +1,11 @@
 import random
+import time
 
 import pygame
 from sys import exit
 
 from fruit import Fruit
+from bomb import Bomb
 
 pygame.init()
 
@@ -18,15 +20,15 @@ screen_height = screen.get_height() / 2
 kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 
-# Propriedades da fruta
+# Propriedades dos objetos
 fruit_surf = pygame.image.load("graphics/fruit.png")
-fruits = []
+bomb_image_path = "graphics/bomb.png"
+objects = []
 
 # Propriedades de icones
 app_icon_path = "graphics/app_icon.png"
 mouse_icon_path = "graphics/mouse_icon.png"
 keyboard_icon_path = "graphics/keyboard_icon.png"
-scale_factor = 3  # Favor não mudar (é sério)
 icon_pos = (screen_width + 265, screen_height + 195)
 
 # Propriedades do chão
@@ -36,18 +38,22 @@ ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, gro
 
 # Variáveis aleatórias ai sla
 mouse_controls = True
+initial_time = time.time()
+current_time = initial_time
+countdown = 0
 
 
 # Essa função vai pegar a imagem e multiplicar por 3 (scale_factor) :thumbsup:
-def load_image_and_scale(image_path):
+def load_image_and_scale(image_path, scale_factor):
     original_image = pygame.image.load(image_path)
     return pygame.transform.scale(original_image, (
         original_image.get_width() * scale_factor, original_image.get_height() * scale_factor))
 
 
-mouse_icon = load_image_and_scale(mouse_icon_path)
-keyboard_icon = load_image_and_scale(keyboard_icon_path)
-app_icon = load_image_and_scale(app_icon_path)
+mouse_icon = load_image_and_scale(mouse_icon_path, 3)
+keyboard_icon = load_image_and_scale(keyboard_icon_path, 3)
+app_icon = load_image_and_scale(app_icon_path, 3)
+bomb_surf = load_image_and_scale(bomb_image_path, 3)
 
 
 def render_ui():    # Função para caso vc precise renderizar alguma coisa relacionada a UI na tela :)
@@ -69,11 +75,25 @@ def movement():
 
 
 def spawn_new_fruit():
-    x_pos = random.randint(0, (screen_width * 2) - 36)
+    fruit_x_pos = random.randint(0, (screen_width * 2) - 36)
     fruit_speed = random.randint(1, 4)
-    new_fruit = Fruit(x_pos, fruit_speed, fruit_surf)
-    fruits.append(new_fruit)
-    print(fruits)
+    new_fruit = Fruit(fruit_x_pos, fruit_speed, fruit_surf)
+    objects.append(new_fruit)
+
+
+def spawn_new_bomb():
+    bomb_x_pos = random.randint(0, (screen_width * 2) - 36)
+    bomb_speed = random.randint(1, 4)
+    new_bomb = Bomb(bomb_x_pos, bomb_speed, bomb_surf)
+    objects.append(new_bomb)
+
+
+def randomize_spawns():
+    random_spawn_type = random.randint(0, 4)
+    if random_spawn_type == 0:
+        spawn_new_bomb()
+    else:
+        spawn_new_fruit()
 
 
 while True:
@@ -85,15 +105,26 @@ while True:
         elif keys[pygame.K_e]:
             mouse_controls = not mouse_controls
             print(mouse_controls)
-        elif keys[pygame.K_g]:
-            spawn_new_fruit()
 
-    screen.fill("white")  # isolaaaaaaaaaaaaaaaaaadoooooos...... isolaaaaaaaaaaaaaaaaaaaadooooooooooos uuuuuuuuuuuuuuu
+    screen.fill("lightblue")  # isolaaaaaaaaaaaaaaaaaadoooooos...... isolaaaaaaaaaaaaaaaaaaaadooooooooooos uuuuuuuuuuuuuuu
 
-    for fruit in fruits:
+    current_time = time.time()
+
+    if current_time >= countdown:
+        for i in range(1, random.randint(1, 4)):
+            randomize_spawns()
+        countdown = current_time + random.randint(1, 2)
+
+    # TODO: juntar as frutas e bombas em uma classe
+    for fruit in objects:
         fruit.update()
         if fruit.rect.colliderect(ground):
-            fruits.remove(fruit)  # desenha as frutas
+            objects.remove(fruit)  # desenha as frutas
+
+    for bomb in objects:
+        bomb.update()
+        if bomb.rect.colliderect(ground):
+            objects.remove(bomb)
 
     movement()
 
@@ -102,8 +133,10 @@ while True:
 
     screen.blit(kiwi_surf, kiwi_rect)  # desenha o player
     pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
-    for fruit in fruits:
+    for fruit in objects:
         screen.blit(fruit.image, fruit.rect)
+    for bomb in objects:
+        screen.blit(bomb.image, bomb.rect)
 
     render_ui()
 
