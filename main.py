@@ -58,6 +58,13 @@ score = 0
 score_font = font.render(str(score), False, "black")
 score_rect = score_font.get_rect(midtop=(screen_width, 20))
 
+lifes = 3
+lifes1_surf = pygame.image.load('graphics/lifes1.png')
+lifes2_surf = pygame.image.load ('graphics/lifes2.png')
+lifes3_surf = pygame.image.load('graphics/lifes3.png')
+lifes_rect = lifes1_surf.get_rect(topleft=(20, 20))
+
+
 
 # Essa função vai pegar a imagem e multiplicar por 3 (scale_factor) :thumbsup:
 def load_image_and_scale(image_path, scale_factor):
@@ -161,7 +168,10 @@ while True:
             bombs.remove(bomb)
         if bomb.rect.colliderect(kiwi_rect):
             bombs.remove(bomb)
-            score -= 1
+            lifes -= 1
+            if lifes == -1:
+                pygame.quit()
+                exit()
 
     for cloud in clouds:
         cloud.update()
@@ -186,6 +196,13 @@ while True:
 
     for bomb in bombs:  # desenha as bombas
         screen.blit(bomb.image, bomb.rect)
+
+    if lifes == 3:
+        screen.blit(lifes3_surf, lifes_rect)
+    elif lifes == 2:
+        screen.blit(lifes2_surf, lifes_rect)
+    elif lifes == 1:
+        screen.blit(lifes1_surf, lifes_rect)
 
     render_ui()
 
