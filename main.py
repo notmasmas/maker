@@ -117,6 +117,9 @@ def spawn_new_cloud():
     clouds.append(new_cloud)
 
 
+pygame.display.set_icon(app_icon)
+
+
 while True:
     keys = pygame.key.get_pressed()  # n pergunta pq essa variavel ta aq
     for event in pygame.event.get():
