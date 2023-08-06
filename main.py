@@ -4,6 +4,7 @@ import pygame
 from sys import exit
 
 from fruit import Fruit
+from cloud import Cloud
 
 pygame.init()
 
@@ -22,6 +23,12 @@ kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 # Propriedades da fruta
 fruit_surf = pygame.image.load("graphics/fruit.png")
 fruits = []
+
+# Propriedades nuvem
+cloud_surf = pygame.image.load("graphics/cloud.png")
+clouds = []
+spawn_interval = 5000
+last_spawn = 0
 
 # Propriedades de icones
 app_icon_path = "graphics/app_icon.png"
@@ -82,6 +89,13 @@ def spawn_new_fruit():
     print(fruits)
 
 
+def spawn_new_cloud():
+    y_pos = random.randint(20, 60)
+    cloud_speed = random.randint(1, 2)
+    new_cloud = Cloud(y_pos, cloud_speed, cloud_surf)
+    clouds.append(new_cloud)
+
+
 while True:
     keys = pygame.key.get_pressed()  # n pergunta pq essa variavel ta aq
     for event in pygame.event.get():
@@ -94,8 +108,13 @@ while True:
         elif keys[pygame.K_g]:
             spawn_new_fruit()
 
+    current_time = pygame.time.get_ticks()
+
+    if current_time - last_spawn >= spawn_interval:
+        spawn_new_cloud()
+        last_spawn = current_time
+
     screen.fill("white")  # isolaaaaaaaaaaaaaaaaaadoooooos...... isolaaaaaaaaaaaaaaaaaaaadooooooooooos uuuuuuuuuuuuuuu
-    screen.blit(score_font, score_rect)
 
     for fruit in fruits:
         fruit.update()
@@ -106,6 +125,9 @@ while True:
                 fruits.remove(fruit)
                 score += 1
 
+    for cloud in clouds:
+        cloud.update()
+
     movement()
 
     # se vc for fazer algo envolvendo adicionar mais coisas pra renderizar e tals, coloca de baixo dessa linha
@@ -115,6 +137,11 @@ while True:
     pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
     for fruit in fruits:
         screen.blit(fruit.image, fruit.rect)
+
+    for cloud in clouds:
+        screen.blit(cloud.image, cloud.rect)
+
+    screen.blit(score_font, score_rect)
 
     render_ui()
 
