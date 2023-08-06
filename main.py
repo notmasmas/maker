@@ -60,10 +60,9 @@ score_rect = score_font.get_rect(midtop=(screen_width, 20))
 
 lifes = 3
 lifes1_surf = pygame.image.load('graphics/lifes1.png')
-lifes2_surf = pygame.image.load ('graphics/lifes2.png')
+lifes2_surf = pygame.image.load('graphics/lifes2.png')
 lifes3_surf = pygame.image.load('graphics/lifes3.png')
 lifes_rect = lifes1_surf.get_rect(topleft=(20, 20))
-
 
 
 # Essa função vai pegar a imagem e multiplicar por 3 (scale_factor) :thumbsup:
