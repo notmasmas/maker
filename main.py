@@ -7,7 +7,6 @@ from sys import exit
 from fruit import Fruit
 from bomb import Bomb
 from cloud import Cloud
-from heart import Heart
 
 pygame.mixer.init()
 pygame.init()
@@ -25,13 +24,16 @@ kiwi_surf = pygame.image.load("graphics/kiwi.png")
 kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
 
 # Propriedades dos objetos
-fruit_image_path = "graphics/fruit_kiwi.png"
+fruit_kiwi_image_path = "graphics/fruit_kiwi.png"
+fruit_banana_image_path = "graphics/fruit_banana.png.png"
+fruit_orange_image_path = "graphics/fruit_orange.png.png"
 bomb_image_path = "graphics/bomb.png"
 heart_image_path = "graphics/lifes1.png"
 fruit_types = ["kiwi", "banana", "orange"]
 fruits = []
 bombs = []
 hearts = []
+bomb_spawn_positions = [80, -80, 40, -40]
 
 # Propriedades sound effect
 pygame.mixer.music.load("graphics/vine-boom.mp3")
@@ -123,15 +125,18 @@ def movement():
 
 def spawn_new_fruit():
     fruit_x_pos = random.randint(0, (int(screen_width * 2) - 36))
-    fruit_speed = random.randint(1, 4)
+    fruit_speed = random.randint(1, 6)
     fruit_type = random.randint(1, len(fruit_types))
     new_fruit = Fruit(fruit_x_pos, fruit_speed, fruit_type)
     fruits.append(new_fruit)
 
+    if random.randint(1, 100) <= 30:
+        spawn_new_bomb(fruit_x_pos)
 
-def spawn_new_bomb():
-    bomb_x_pos = random.randint(0, (int(screen_width * 2) - 36))
-    bomb_speed = random.randint(1, 4)
+
+def spawn_new_bomb(fruit_x_pos):
+    bomb_x_pos = fruit_x_pos + random.choice(bomb_spawn_positions)
+    bomb_speed = random.randint(2, 6)
     new_bomb = Bomb(bomb_x_pos, bomb_speed, bomb_surf)
     bombs.append(new_bomb)
 
@@ -151,13 +156,10 @@ def spawn_new_cloud():
 
 
 def randomize_spawns():
-    random_spawn_type = random.randint(0, 6)
-    if random_spawn_type in range(0, 2):
-        spawn_new_bomb()
-    else:
+    if random.randint(1, 100) <= 90:
         spawn_new_fruit()
 
-    if random.randint(1, 100) <= 12:
+    if random.randint(1, 100) <= 6:
         spawn_new_heart()
 
 
