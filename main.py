@@ -10,6 +10,7 @@ pygame.init()
 screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Kiwi :D")
 clock = pygame.time.Clock()
+font = pygame.font.Font("graphics/Minecrafter.Reg.ttf", 30)
 
 screen_width = screen.get_width() / 2
 screen_height = screen.get_height() / 2
@@ -36,6 +37,9 @@ ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, gro
 
 # Variáveis aleatórias ai sla
 mouse_controls = True
+score = 0
+score_font = font.render(str(score), False, "black")
+score_rect = score_font.get_rect(midtop=(screen_width, 20))
 
 
 # Essa função vai pegar a imagem e multiplicar por 3 (scale_factor) :thumbsup:
@@ -55,6 +59,8 @@ def render_ui():    # Função para caso vc precise renderizar alguma coisa rela
         screen.blit(mouse_icon, icon_pos)
     else:
         screen.blit(keyboard_icon, icon_pos)
+    global score_font
+    score_font = font.render(str(score), False, "black")
 
 
 def movement():
@@ -89,11 +95,16 @@ while True:
             spawn_new_fruit()
 
     screen.fill("white")  # isolaaaaaaaaaaaaaaaaaadoooooos...... isolaaaaaaaaaaaaaaaaaaaadooooooooooos uuuuuuuuuuuuuuu
+    screen.blit(score_font, score_rect)
 
     for fruit in fruits:
         fruit.update()
         if fruit.rect.colliderect(ground):
             fruits.remove(fruit)  # desenha as frutas
+        if fruit.rect.colliderect(kiwi_rect):
+            if fruit in fruits:
+                fruits.remove(fruit)
+                score += 1
 
     movement()
 
