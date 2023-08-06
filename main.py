@@ -9,6 +9,7 @@ from bomb import Bomb
 from cloud import Cloud
 from heart import Heart
 
+pygame.mixer.init()
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -32,6 +33,10 @@ fruits = []
 bombs = []
 hearts = []
 
+# Propriedades sound effect
+pygame.mixer.music.load("graphics/vine-boom.mp3")
+pygame.mixer.music.set_volume(0.3)
+
 # Propriedades nuvem
 cloud_surf = pygame.image.load("graphics/cloud.png")
 clouds = []
@@ -40,6 +45,7 @@ clouds = []
 app_icon_path = "graphics/app_icon.png"
 mouse_icon_path = "graphics/mouse_icon.png"
 keyboard_icon_path = "graphics/keyboard_icon.png"
+boom_path = "graphics/boom.png"
 icon_pos = (screen_width + 265, screen_height + 195)
 
 # Propriedades do chão
@@ -80,6 +86,8 @@ keyboard_icon = load_image_and_scale(keyboard_icon_path, 3)
 app_icon = load_image_and_scale(app_icon_path, 3)
 bomb_surf = load_image_and_scale(bomb_image_path, 3)
 heart_surf = load_image_and_scale(heart_image_path, 3)
+boom_surf = load_image_and_scale(boom_path, 3)
+
 
 pygame.display.set_icon(app_icon)
 
@@ -143,8 +151,8 @@ def spawn_new_cloud():
 
 
 def randomize_spawns():
-    random_spawn_type = random.randint(0, 4)
-    if random_spawn_type == 0:
+    random_spawn_type = random.randint(0, 6)
+    if random_spawn_type in range(0, 2):
         spawn_new_bomb()
     else:
         spawn_new_fruit()
@@ -158,6 +166,7 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
+            pygame.mixer.quit()
             exit()
         elif keys[pygame.K_e]:
             mouse_controls = not mouse_controls
@@ -196,6 +205,9 @@ while True:
         if bomb.rect.colliderect(ground):
             bombs.remove(bomb)
         if bomb.rect.colliderect(kiwi_rect):
+            boom_rect = boom_surf.get_rect(topleft=(bomb.rect.x, bomb.rect.y))
+            screen.blit(boom_surf, boom_rect)
+            pygame.mixer.music.play()
             bombs.remove(bomb)
             lifes -= 1
             if lifes == -1:
