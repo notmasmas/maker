@@ -1,61 +1,81 @@
-import random
-import time
-
 import pygame
+import time
+import random
+
 from sys import exit
 
-from fruit import Fruit
-from bomb import Bomb
-from cloud import Cloud
+import image_loader
+from objects.fruit import Fruit
+from objects.bomb import Bomb
+from objects.cloud import Cloud
 
 pygame.mixer.init()
+
+# Inicialização do pygame
 pygame.init()
 
-screen = pygame.display.set_mode((640, 480))
+# Configuração da tela
+screen_width = 640
+screen_height = 480
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Kiwi :D")
+
+# Relógio para controle de frames
 clock = pygame.time.Clock()
-font = pygame.font.Font("graphics/fonts/Minecrafter.Reg.ttf", 30)
 
-screen_width = screen.get_width() / 2
-screen_height = screen.get_height() / 2
+# Carregamento de fonte
+font = pygame.font.Font("graphics/fonts/Daydream.ttf", 30)
 
-# Propriedades do kiwi (player)
-kiwi_surf = pygame.image.load("graphics/kiwi.png")
-kiwi_rect = kiwi_surf.get_rect(midbottom=(screen_width, 435))
+# Cálculo do centro da tela
+center_x = screen_width / 2
+center_y = screen_height / 2
 
-# Propriedades dos objetos
+# Caminhos dos sprites
+player_image_path = "graphics/kiwi.png"
 fruit_kiwi_image_path = "graphics/fruit_kiwi.png"
-fruit_banana_image_path = "graphics/fruit_banana.png.png"
-fruit_orange_image_path = "graphics/fruit_orange.png.png"
+fruit_banana_image_path = "graphics/fruit_banana.png"
+fruit_orange_image_path = "graphics/fruit_orange.png"
 bomb_image_path = "graphics/bomb.png"
 heart_image_path = "graphics/lifes1.png"
+cloud_image_path = "graphics/cloud.png"
+
+lifes1_path = "graphics/lifes1.png"
+lifes2_path = "graphics/lifes2.png"
+lifes3_path = "graphics/lifes3.png"
+
+app_icon_path = "graphics/app_icon.png"
+mouse_icon_path = "graphics/mouse_icon.png"
+keyboard_icon_path = "graphics/keyboard_icon.png"
+boom_path = "graphics/boom.png"
+
+# Propriedades do kiwi (player)
+player_surf = image_loader.load_image(player_image_path, 1)
+kiwi_rect = player_surf.get_rect(midbottom=(center_x, 435))
+
+# Propriedades dos objetos
 fruit_types = ["kiwi", "banana", "orange"]
 fruits = []
 bombs = []
 hearts = []
 bomb_spawn_positions = [80, -80, 40, -40]
 
-# Propriedades sound effect
-pygame.mixer.music.load("graphics/vine-boom.mp3")
+# Propriedades do som
+pygame.mixer.music.load("sounds/vine-boom.mp3")
 pygame.mixer.music.set_volume(0.3)
 
-# Propriedades nuvem
-cloud_surf = pygame.image.load("graphics/cloud.png")
+# Propriedades da nuvem
+cloud_surf = image_loader.load_image(cloud_image_path, 1)
 clouds = []
 
-# Propriedades de icones
-app_icon_path = "graphics/app_icon.png"
-mouse_icon_path = "graphics/mouse_icon.png"
-keyboard_icon_path = "graphics/keyboard_icon.png"
-boom_path = "graphics/boom.png"
-icon_pos = (screen_width + 265, screen_height + 195)
+# Propriedades dos ícones
+icon_pos = (center_x + 265, center_y + 195)
 
 # Propriedades do chão
 ground_height = 45
 ground_color = (34, 139, 34)
-ground = pygame.Rect(0, screen_height * 2 - ground_height, screen_width * 2, ground_height)
+ground = pygame.Rect(0, center_y * 2 - ground_height, center_x * 2, ground_height)
 
-# Variáveis aleatórias ai sla
+# Variáveis aleatórias
 background_color = (135, 206, 335)
 mouse_controls = True
 initial_time = time.time()
@@ -67,29 +87,20 @@ first_fruit = False
 
 score = 0
 score_font = font.render(str(score), False, "black")
-score_rect = score_font.get_rect(midtop=(screen_width, 20))
+score_rect = score_font.get_rect(midtop=(center_x, 20))
 
 lifes = 3
-lifes1_surf = pygame.image.load('graphics/lifes1.png')
-lifes2_surf = pygame.image.load('graphics/lifes2.png')
-lifes3_surf = pygame.image.load('graphics/lifes3.png')
+lifes1_surf = image_loader.load_image(lifes1_path, 1)
+lifes2_surf = image_loader.load_image(lifes2_path, 1)
+lifes3_surf = image_loader.load_image(lifes3_path, 1)
 lifes_rect = lifes1_surf.get_rect(topleft=(20, 20))
 
-
-# Essa função vai pegar a imagem e multiplicar por 3 (scale_factor) :thumbsup:
-def load_image_and_scale(image_path, scale_factor):
-    original_image = pygame.image.load(image_path)
-    return pygame.transform.scale(original_image, (
-        original_image.get_width() * scale_factor, original_image.get_height() * scale_factor))
-
-
-mouse_icon = load_image_and_scale(mouse_icon_path, 3)
-keyboard_icon = load_image_and_scale(keyboard_icon_path, 3)
-app_icon = load_image_and_scale(app_icon_path, 3)
-bomb_surf = load_image_and_scale(bomb_image_path, 3)
-heart_surf = load_image_and_scale(heart_image_path, 3)
-boom_surf = load_image_and_scale(boom_path, 3)
-
+mouse_icon = image_loader.load_image(mouse_icon_path, 3)
+keyboard_icon = image_loader.load_image(keyboard_icon_path, 3)
+app_icon = image_loader.load_image(app_icon_path, 3)
+bomb_surf = image_loader.load_image(bomb_image_path, 3)
+heart_surf = image_loader.load_image(heart_image_path, 3)
+boom_surf = image_loader.load_image(boom_path, 3)
 
 pygame.display.set_icon(app_icon)
 
@@ -184,17 +195,17 @@ while True:
             randomize_spawns()
         countdown = current_time + random.randint(1, 2)
 
-    if score < 0:
-        score = 0
-
     if score <= -1 and first_fruit:
-        print("You lose!")
+        print("You lose")
+        pygame.quit()
+        exit()
 
     for fruit in fruits:
         fruit.update()
         if fruit.rect.colliderect(ground):
             fruits.remove(fruit)
-            score -= 5
+            if first_fruit:
+                score -= 5
         if fruit.rect.colliderect(kiwi_rect):
             if fruit in fruits:
                 fruits.remove(fruit)
@@ -237,7 +248,7 @@ while True:
 
     # okay bjos <3
 
-    screen.blit(kiwi_surf, kiwi_rect)  # desenha o player
+    screen.blit(player_surf, kiwi_rect)  # desenha o player
     pygame.draw.rect(screen, ground_color, ground)  # desenha o chao
 
     for cloud in clouds:  # desenha as nuvens
