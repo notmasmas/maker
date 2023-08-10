@@ -25,6 +25,7 @@ clock = pygame.time.Clock()
 
 # Carregamento de fonte
 font = pygame.font.Font("graphics/fonts/Daydream.ttf", 30)
+font2 = pygame.font.Font("graphics/fonts/Daydream.ttf", 15)
 
 # Cálculo do centro da tela
 center_x = screen_width / 2
@@ -40,8 +41,6 @@ heart_image_path = "graphics/lifes1.png"
 cloud_image_path = "graphics/cloud.png"
 
 lifes1_path = "graphics/lifes1.png"
-lifes2_path = "graphics/lifes2.png"
-lifes3_path = "graphics/lifes3.png"
 
 app_icon_path = "graphics/app_icon.png"
 mouse_icon_path = "graphics/mouse_icon.png"
@@ -58,6 +57,8 @@ fruits = []
 bombs = []
 hearts = []
 bomb_spawn_positions = [80, -80, 40, -40]
+starting_text = font2.render(str("Pegue uma fruta para iniciar"), False, "black")
+starting_text_rect = starting_text.get_rect(midtop=(center_x, center_y))
 
 # Propriedades do som
 pygame.mixer.music.load("sounds/vine-boom.mp3")
@@ -90,10 +91,12 @@ score_font = font.render(str(score), False, "black")
 score_rect = score_font.get_rect(midtop=(center_x, 20))
 
 lifes = 3
-lifes1_surf = image_loader.load_image(lifes1_path, 1)
-lifes2_surf = image_loader.load_image(lifes2_path, 1)
-lifes3_surf = image_loader.load_image(lifes3_path, 1)
+lifes1_surf = image_loader.load_image(lifes1_path, 2)
+# lifes2_surf = image_loader.load_image(lifes2_path, 1)
+# lifes3_surf = image_loader.load_image(lifes3_path, 1)
 lifes_rect = lifes1_surf.get_rect(topleft=(20, 20))
+lifes_list = [0, 1, 2]
+lifes_xpos = 50
 
 mouse_icon = image_loader.load_image(mouse_icon_path, 3)
 keyboard_icon = image_loader.load_image(keyboard_icon_path, 3)
@@ -115,12 +118,8 @@ def render_ui():  # Função para caso vc precise renderizar alguma coisa relaci
     score_font = font.render(str(score), False, "black")
     screen.blit(score_font, score_rect)
 
-    if lifes == 3:
-        screen.blit(lifes3_surf, lifes_rect)
-    elif lifes == 2:
-        screen.blit(lifes2_surf, lifes_rect)
-    elif lifes == 1:
-        screen.blit(lifes1_surf, lifes_rect)
+    if not first_fruit:
+        screen.blit(starting_text, starting_text_rect)
 
 
 def movement():
@@ -174,6 +173,19 @@ def randomize_spawns():
         spawn_new_heart()
 
 
+def add_life():
+    global lifes
+    lifes += 1
+    lifes_list.append(0)
+
+
+def lose_life():
+    global lifes
+    lifes -= 1
+    if len(lifes_list) > 0:
+        lifes_list.pop()
+
+
 while True:
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
@@ -222,7 +234,7 @@ while True:
             screen.blit(boom_surf, boom_rect)
             pygame.mixer.music.play()
             bombs.remove(bomb)
-            lifes -= 1
+            lose_life()
             if lifes == -1:
                 pygame.quit()
                 exit()
@@ -233,7 +245,7 @@ while True:
             hearts.remove(heart)
         if heart.rect.colliderect(kiwi_rect):
             if lifes < 3:
-                lifes += 1
+                add_life()
             hearts.remove(heart)
 
     for cloud in clouds:
@@ -263,7 +275,12 @@ while True:
     for heart in hearts:
         screen.blit(heart.image, heart.rect)
 
+    for lives in enumerate(lifes_list):
+        screen.blit(lifes1_surf, (50 + 50 * lives[0], 20))
+
     render_ui()
+    pygame.display.flip()
+    lifes_xpos = 50
 
     pygame.display.update()
     clock.tick(60)
