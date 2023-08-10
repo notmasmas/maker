@@ -14,6 +14,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="str.get_rect" />
+          <option value="int.__getitem__" />
         </list>
       </option>
     </inspection_tool>

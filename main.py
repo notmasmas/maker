@@ -217,7 +217,7 @@ while True:
         if fruit.rect.colliderect(ground):
             fruits.remove(fruit)
             if first_fruit:
-                score -= 5
+                score -= 2
         if fruit.rect.colliderect(kiwi_rect):
             if fruit in fruits:
                 fruits.remove(fruit)
