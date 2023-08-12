@@ -14,12 +14,20 @@ class Fruit:
 
     def __init__(self, x, speed, type):
         self.image = self.get_image_by_type(type)
-        self.type = type
         self.rect = self.image.get_rect(midtop=(x, -200))
+        self.type = type
         self.speed = speed
+        self.alpha = 255
 
     def update(self):
         self.rect.y += self.speed
+
+    def death(self):
+        self.alpha -= 50
+        self.image.set_alpha(self.alpha)
+
+    def is_done(self):
+        return self.alpha <= 0
 
     def get_image_by_type(self, fruit_type):
         if fruit_type == 1:

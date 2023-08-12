@@ -24,8 +24,9 @@ pygame.display.set_caption("Kiwi :D")
 clock = pygame.time.Clock()
 
 # Carregamento de fonte
-font = pygame.font.Font("graphics/fonts/Daydream.ttf", 30)
-font2 = pygame.font.Font("graphics/fonts/Daydream.ttf", 15)
+load_score_font = pygame.font.Font("graphics/fonts/Daydream.ttf", 30)
+load_text_font = pygame.font.Font("graphics/fonts/Daydream.ttf", 15)
+load_fps_font = pygame.font.Font("graphics/fonts/Daydream.ttf", 20)
 
 # Cálculo do centro da tela
 center_x = screen_width / 2
@@ -57,7 +58,7 @@ fruits = []
 bombs = []
 hearts = []
 bomb_spawn_positions = [80, -80, 40, -40]
-starting_text = font2.render(str("Pegue uma fruta para iniciar"), False, "black")
+starting_text = load_text_font.render(str("Pegue uma fruta para iniciar"), False, "black")
 starting_text_rect = starting_text.get_rect(midtop=(center_x, center_y))
 
 # Propriedades do som
@@ -87,16 +88,20 @@ pygame.time.set_timer(spawn_cloud_event, 5000)
 first_fruit = False
 
 score = 0
-score_font = font.render(str(score), False, "black")
+score_font = load_score_font.render(str(score), False, "black")
 score_rect = score_font.get_rect(midtop=(center_x, 20))
 
+fps = clock.get_fps()
+fps_font = load_fps_font.render(str(fps), False, "black")
+fps_rect = fps_font.get_rect(topright=(520, 20))
+show_fps = False
+
 lifes = 3
-lifes1_surf = image_loader.load_image(lifes1_path, 2)
-# lifes2_surf = image_loader.load_image(lifes2_path, 1)
-# lifes3_surf = image_loader.load_image(lifes3_path, 1)
-lifes_rect = lifes1_surf.get_rect(topleft=(20, 20))
+life_icon = image_loader.load_image(lifes1_path, 2)
+life_rect = life_icon.get_rect(topleft=(20, 20))
+life_spacing = 40
+life_xpos = 50
 lifes_list = [0, 1, 2]
-lifes_xpos = 50
 
 mouse_icon = image_loader.load_image(mouse_icon_path, 3)
 keyboard_icon = image_loader.load_image(keyboard_icon_path, 3)
@@ -115,11 +120,19 @@ def render_ui():  # Função para caso vc precise renderizar alguma coisa relaci
         screen.blit(keyboard_icon, icon_pos)
 
     global score_font
-    score_font = font.render(str(score), False, "black")
+    score_font = load_score_font.render(str(score), False, "black")
     screen.blit(score_font, score_rect)
+
+    global fps_font
+    if show_fps:
+        fps_font = load_fps_font.render(f"fps: {fps:.2f}", False, "black")
+        screen.blit(fps_font, fps_rect)
 
     if not first_fruit:
         screen.blit(starting_text, starting_text_rect)
+
+    for lives in enumerate(lifes_list):
+        screen.blit(life_icon, (20 + life_spacing * lives[0], 20))
 
 
 def movement():
@@ -197,6 +210,8 @@ while True:
             mouse_controls = not mouse_controls
         elif event.type == spawn_cloud_event:
             spawn_new_cloud()
+        elif keys[pygame.K_F3]:
+            show_fps = not show_fps
 
     screen.fill("lightblue")
 
@@ -212,11 +227,18 @@ while True:
         pygame.quit()
         exit()
 
+    if lifes <= -1:
+        pygame.quit()
+        exit()
+
     for fruit in fruits:
         fruit.update()
         if fruit.rect.colliderect(ground):
-            fruits.remove(fruit)
-            if first_fruit:
+            #fruit.death()
+            #fruit.is_done()        # bug bem de arrombado, eu quero colocar uma animação de fade out, funciona,
+            #if fruit.is_done():    # mas como o objeto fica por mais um tempinho, a pontuação acaba sendo subtraida
+            fruits.remove(fruit)    # mais do q deveria, ent em vez de ser -2, acaba sendo -10 (exemplo), pq
+            if first_fruit:         # o objeto acaba entrando no chão e ficando ali por um tempo
                 score -= 2
         if fruit.rect.colliderect(kiwi_rect):
             if fruit in fruits:
@@ -235,9 +257,6 @@ while True:
             pygame.mixer.music.play()
             bombs.remove(bomb)
             lose_life()
-            if lifes == -1:
-                pygame.quit()
-                exit()
 
     for heart in hearts:
         heart.update()
@@ -275,12 +294,11 @@ while True:
     for heart in hearts:
         screen.blit(heart.image, heart.rect)
 
-    for lives in enumerate(lifes_list):
-        screen.blit(lifes1_surf, (50 + 50 * lives[0], 20))
+    fps = clock.get_fps()
 
     render_ui()
     pygame.display.flip()
-    lifes_xpos = 50
+    life_xpos = 50
 
     pygame.display.update()
     clock.tick(60)
